@@ -35,36 +35,14 @@ T_START_TF=$(date +%s)
 cd "$TF_DIR" || exit 1
 
 # Zerstört VM (ID 100) und klont sie neu aus Template (ID 421)
-cd /terraform/terraform apply -replace="$TF_RESOURCE_NAME" -auto-approve -input=false >> /tmp/recovery.log 2>&1
+terraform apply -replace="$TF_RESOURCE_NAME" -auto-approve -input=false >> /tmp/recovery.log 2>&1
 
 T_END_TF=$(date +%s)
 DURATION_ORCH=$((T_END_TF - T_START_TF))
 echo ">>> Terraform fertig. Dauer: $DURATION_ORCH Sekunden."
 
 # --- PHASE 2: BOOTSTRAPPING (Windows Boot & Service) ---
-echo "--- PHASE 2: Warte auf Windows Service unter $TA#!/bin/bash
-# Datei: /var/ossec/active-response/bin/orchestrator_thesis.sh
-# Berechtigung setzen nicht vergessen: chmod 750 /var/ossec/active-response/bin/orchestrator.sh
-# Owner: root:wazuh
-
-# --- 1. Logging für Thesis-Daten ---
-LOGFILE="/var/log/thesis-messung.log"
-exec > >(tee -a "$LOGFILE") 2>&1
-
-echo "================================================================"
-echo "[$(date)] SCRIPT START - Trigger durch Wazuh (Rule 100010)"
-
-# --- 2. Konfiguration ---
-# Exakter Name aus 'terraform state list':
-TF_RESOURCE_NAME="proxmox_virtual_environment_vm.vm_instance"
-
-# IP der Windows VM (ID 100), die wir prüfen:
-TARGET_IP="192.168.178.55"
-TF_DIR="/root/terraform"
-
-# --- 3. Input Validierung (Wazuh Standard) ---
-read INPUT_JSON
-RULE_ID=$(RGET_IP ---"
+echo "--- PHASE 2: Warte auf Windows Service unter $TARGET_IP ---"
 
 # Loop: Prüft alle 2 Sek., ob der Webserver antwortet
 # Falls kein Webserver läuft, nutze: while ! nc -z -w 1 $TARGET_IP 3389; do ...
